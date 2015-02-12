@@ -1,0 +1,26 @@
+{
+    "name": "ews",
+    "version": "0.0.1",
+    "description": "A library to connect to MS Exchange (calendar and contacts)",
+    "main": "ews.js",
+    "dependencies": {
+        "es6-promise": "^2.0.1",
+        "httpntlm": "^1.4.0",
+        "keep-alive-agent": "^0.0.1",
+        "request": "^2.53.0",
+        "soap": "^0.6.0",
+        "xml2js": "^0.4.4",
+        "util": "^0.10.3",
+        "require": "^2.4.17",
+        "debuglog": "^1.0.1"
+    },
+    "devDependencies": {
+        "chai": "^2.0.0",
+        "mocha": "^2.1.0"
+    },
+    "scripts": {
+        "test": "node test\\test.js"
+    },
+  "author": "Shashi Uli <shashi_uli@yahoo.com>",
+  "license": "ISC"
+}
