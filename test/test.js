@@ -31,10 +31,10 @@ _testCalendarAPIs = function (session) {
     console.log('Getting calendar entries for next 24 hours for session calendar');
     session.getFolder('calendar').then(function (folder) {
         var calendar = new ews.Calendar(session, null, folder.FolderId, folder.ChangeKey);
-        calendar.getEntries().then(_displayCalendarEntries);
+        calendar.getEntries().then(_displayCalendarEntries.bind(calendar));
         console.log('Getting calendar entries for next 24 hours for mailbox ' + mailbox);
         var calendar2 = new ews.Calendar(session, mailbox);
-        calendar2.getEntries().then(_displayCalendarEntries);
+        calendar2.getEntries().then(_displayCalendarEntries.bind(calendar));
     });
 }
 
@@ -48,8 +48,12 @@ _displayCalendarEntries = function (entries) {
             if (entries[i].MeetingUrl != null) {
                 // including meeting URL and audio information, if there is some
                 console.log('    Meeting URL:' + entries[i].MeetingUrl);
-                console.log('    AudioOptions:' + entries[i].GTMAudioOptions);
+                console.log('    AudioOptions:' + entries[i].MeetingAudioOptions);
                 console.log('    Attendees:' + entries[i].Attendees);
+            } else {
+                this.getItemDetails(entries[i]).then(function (entry) {
+                    console.log('    Body:' + entry.Body);
+                });
             }
         }
     }
@@ -63,9 +67,9 @@ _testContactAPIs = function (session) {
         if (roomLists == null) {
             console.log('    Room List is null (Exchange Admin hasn\'t configured them)');
         }
-        console.log("Getting Contact details for " + mailbox);
         return contacts.getDetails(mailbox);
     }).then(function (contact) {
+        console.log("Contact details for " + mailbox);
         console.log("    " + contact.DisplayName);
         console.log("    " + contact.Email);
         var i = 0;
