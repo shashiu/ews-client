@@ -28,13 +28,19 @@ msExchange.autoDiscover(mailbox)
 });
 
 _testCalendarAPIs = function (session) {
-    console.log('Getting calendar entries for next 24 hours for session calendar');
     session.getFolder('calendar').then(function (folder) {
         var calendar = new ews.Calendar(session, null, folder.FolderId, folder.ChangeKey);
+
+        console.log('Getting room availability : ' + mailbox);
+        calendar.getAvailabilityForRoom(mailbox).then(_displayCalendarEntries.bind(calendar));
+
+        console.log('Getting calendar entries for next 24 hours for session calendar');
         calendar.getEntries().then(_displayCalendarEntries.bind(calendar));
+
         console.log('Getting calendar entries for next 24 hours for mailbox ' + mailbox);
         var calendar2 = new ews.Calendar(session, mailbox);
         calendar2.getEntries().then(_displayCalendarEntries.bind(calendar));
+
     });
 }
 
@@ -62,6 +68,7 @@ _displayCalendarEntries = function (entries) {
 
 _testContactAPIs = function (session) {
     var contacts = new ews.Contacts(session);
+
     console.log("Getting room lists");
     contacts.getRoomLists().then(function (roomLists) {
         if (roomLists == null) {
@@ -69,6 +76,7 @@ _testContactAPIs = function (session) {
         }
         return contacts.getDetails(mailbox);
     }).then(function (contact) {
+
         console.log("Contact details for " + mailbox);
         console.log("    " + contact.DisplayName);
         console.log("    " + contact.Email);
