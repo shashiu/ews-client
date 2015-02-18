@@ -1,3 +1,4 @@
+'use strict';
 var ews = require('./../ews');
 
 // get web credentials from process environment
@@ -11,57 +12,61 @@ if (user == null || pass == null || domain == null || mailbox == null) {
 }
 
 // setup connection to Exchange
-var msExchange = new ews.MSExchange();
+var msExchange = new ews.MSExchange(user, pass, domain);
 
 // Autodiscover URL to get to exchange web service
-msExchange.setAuth(user, pass, domain);
 console.log("Autodiscover");
 msExchange.autoDiscover(mailbox)
 .then(function () {
 
     console.log("Autodiscover Success!");
-    _testCalendarAPIs(msExchange);
-    _testContactAPIs(msExchange);
+    var testHarness = new Test(msExchange);
+    testHarness.testCalendarAPIs();
+    testHarness.testContactAPIs();
 
 }).catch(function (error) {
-    console.log("Error!", error);
+    console.log(error);
+    console.log("Stack Trace: ", error.stack);
 });
 
-_testCalendarAPIs = function (session) {
-    console.log('Getting calendar entries for next 24 hours for session calendar');
-    session.getFolder('calendar').then(function (folder) {
-        var calendar = new ews.Calendar(session, null, folder.FolderId, folder.ChangeKey);
-        calendar.getEntries().then(_displayCalendarEntries.bind(calendar));
+function Test(session) {
+    this._session = session;
+
+    this._displayCalendarEntries = function (entries) {
+        console.log('----------------------------------------------------------------------------');
+        if (entries != null) {
+            for (var i = 0; i < entries.length; i++) {
+                // display the calendar entries for the room
+                console.log(entries[i].Subject);
+                console.log('    From: ' + entries[i].Start + ', To: ' + entries[i].End)
+                if (entries[i].MeetingUrl != null) {
+                    // including meeting URL and audio information, if there is some
+                    console.log('    Meeting URL:' + entries[i].MeetingUrl);
+                    console.log('    AudioOptions:' + entries[i].MeetingAudioOptions);
+                    console.log('    Attendees:' + entries[i].Attendees);
+                }
+            }
+        }
+        console.log('----------------------------------------------------------------------------');
+    }
+}
+
+Test.prototype.testCalendarAPIs = function () {
+    console.log('Getting calendar entries for next 24 hours for session user\'s calendar');
+    var self = this;
+    this._session.getFolder('calendar').then(function (folder) {
+
+        var calendar1 = new ews.Calendar(self._session, null, folder.FolderId, folder.ChangeKey);
+        calendar1.getEntries().then(self._displayCalendarEntries);
+
         console.log('Getting calendar entries for next 24 hours for mailbox ' + mailbox);
-        var calendar2 = new ews.Calendar(session, mailbox);
-        calendar2.getEntries().then(_displayCalendarEntries.bind(calendar));
+        var calendar2 = new ews.Calendar(self._session, mailbox);
+        calendar2.getEntries().then(self._displayCalendarEntries);
     });
 }
 
-_displayCalendarEntries = function (entries) {
-    console.log('----------------------------------------------------------------------------');
-    if (entries != null) {
-        for (var i = 0; i < entries.length; i++) {
-            // display the calendar entries for the room
-            console.log(entries[i].Subject);
-            console.log('    From: ' + entries[i].Start + ', To: ' + entries[i].End)
-            if (entries[i].MeetingUrl != null) {
-                // including meeting URL and audio information, if there is some
-                console.log('    Meeting URL:' + entries[i].MeetingUrl);
-                console.log('    AudioOptions:' + entries[i].MeetingAudioOptions);
-                console.log('    Attendees:' + entries[i].Attendees);
-            } else {
-                this.getItemDetails(entries[i]).then(function (entry) {
-                    console.log('    Body:' + entry.Body);
-                });
-            }
-        }
-    }
-    console.log('----------------------------------------------------------------------------');
-}
-
-_testContactAPIs = function (session) {
-    var contacts = new ews.Contacts(session);
+Test.prototype.testContactAPIs = function () {
+    var contacts = new ews.Contacts(this._session);
     console.log("Getting room lists");
     contacts.getRoomLists().then(function (roomLists) {
         if (roomLists == null) {

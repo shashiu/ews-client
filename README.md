@@ -10,14 +10,14 @@ npm install ews
 ```JavaScript
 var ews = require('ews');
 
-var mailbox = 'youremail@exchangedomain.com'
-var exSession = new ews.MSExchange();
+var mailbox = 'email@exchangedomain.com'
+var exSession = new ews.MSExchange(ntlmuser, ntlmpass, '', ntlmdomain);
 
-exSession.setAuth(ntlmuser, ntlmpass, '', ntlmdomain);
 exSession.autoDiscover(mailbox)
 .then(function() {
 
       var calendar = new ews.Calendar(exSession, mailbox);
+
       calendar.getEntries().then(function(entries) {
 	      /* do something with the entries */
       });
