@@ -74,6 +74,7 @@ Test.prototype.testContactAPIs = function () {
         }
         return contacts.getDetails(mailbox);
     }).then(function (contact) {
+
         console.log("Contact details for " + mailbox);
         console.log("    " + contact.DisplayName);
         console.log("    " + contact.Email);
