@@ -51,6 +51,16 @@ function Test(session) {
     }
 }
 
+Test.prototype.testRooms = function () {
+    // THIS DOESNT WORK
+    var self = this;
+    var contacts = new ews.Contacts(this._session);
+    contacts.enumerateAllRooms().then(function (entries) {
+        for(var i=0; i<entries.length; i++)
+            console.log("Contact details for ") + entries[i].DisplayName;
+    });
+}
+
 Test.prototype.testCalendarAPIs = function () {
     console.log('Getting calendar entries for next 24 hours for session user\'s calendar');
     var self = this;
@@ -72,15 +82,13 @@ Test.prototype.testContactAPIs = function () {
         if (roomLists == null) {
             console.log('    Room List is null (Exchange Admin hasn\'t configured them)');
         }
+        console.log('Getting contact details for ' + mailbox);
         return contacts.getDetails(mailbox);
     }).then(function (contact) {
 
-        console.log("Contact details for " + mailbox);
         console.log("    " + contact.DisplayName);
         console.log("    " + contact.Email);
-        var i = 0;
-        for (i = 0; i < contact.phoneNumbers.length; i++) {
-            console.log("    " + contact.phoneNumbers[i]);
-        }
+        console.log("    " + JSON.stringify(contact.phoneNumbers)); 
+        console.log("    BusinessPhone:" + contact.phoneNumbers.BusinessPhone); // contact.phoneNumbers["BusinessPhone"]); // 
     });
 }

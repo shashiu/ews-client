@@ -4,7 +4,7 @@ A library to connect to exchange and retrieve calendar and contact information.
 This library uses NTLM for authentication with the exchange server.
 
 ## Installation
-npm install ews
+'''npm install ews'''
 
 ## Usage
 ```JavaScript
@@ -20,13 +20,16 @@ exSession.autoDiscover(mailbox)
 
       calendar.getEntries().then(function(entries) {
 	      /* do something with the entries */
+		  for (var i = 0; i < entries.length; i++) {
+                console.log(entries[i].Subject);
+                console.log('From: ' + entries[i].Start + ', To: ' + entries[i].End);
       });
 
 });
 ```
 
 ## Tests
-npm test
+'''npm test'''
 
 ## Release History
 0.0.1 Initial version
